@@ -5,7 +5,9 @@ export function generateCards(shapes: Shape[]) {
   const duplicates: Shape[] = []
   shapes.forEach((shape) => {
     duplicates.push(shape)
-    duplicates.push(shape)
+    const duplicate = { ...shape }
+    duplicate.uniqueId += '-dup'
+    duplicates.push(duplicate)
   })
 
   // shuffle the cards

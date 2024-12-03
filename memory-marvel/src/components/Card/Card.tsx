@@ -1,9 +1,27 @@
 import { cardFront } from '../../config/icons'
 import './style.css'
 
-const Card = ({ uniqueId, shape }: any) => {
+const Card = ({
+  uniqueId,
+  shape,
+  onCardClick,
+  flipped,
+}: {
+  key: string
+  uniqueId: string
+  shapeId: string
+  shape: string
+  onCardClick: () => void
+  flipped: boolean
+}) => {
+  // console.log('rendering: ', uniqueId)
+  // console.log('flipped: ', flipped)
   return (
-    <div className="memory-card" key={uniqueId}>
+    <div
+      className={`memory-card ${flipped && 'flipped'}`}
+      key={uniqueId}
+      onClick={onCardClick}
+    >
       <div className="card-content">
         <div className="card-front">
           <img src={cardFront} className="card-front" alt="Card Front" />
