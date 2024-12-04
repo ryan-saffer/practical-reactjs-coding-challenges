@@ -14,8 +14,6 @@ const Card = ({
   onCardClick: () => void
   flipped: boolean
 }) => {
-  // console.log('rendering: ', uniqueId)
-  // console.log('flipped: ', flipped)
   return (
     <div
       className={`memory-card ${flipped && 'flipped'}`}
@@ -24,7 +22,12 @@ const Card = ({
     >
       <div className="card-content">
         <div className="card-front">
-          <img src={cardFront} className="card-front" alt="Card Front" />
+          <img
+            src={cardFront}
+            className="card-front"
+            alt="Card Front"
+            draggable={false}
+          />
         </div>
         <div className="card-back">
           <img src={shape} className="number icon" alt="Number icon" />

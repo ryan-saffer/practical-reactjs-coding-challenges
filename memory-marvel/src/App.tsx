@@ -8,15 +8,18 @@ import shapes, { Shape } from './data'
 import { generateCards } from './utils/generate-cards'
 
 function App() {
-  const showModal = false
-
   const [cards, setCards] = useState(generateCards(shapes))
   const [currentFlippedCards, setCurrentFlippedCards] = useState<Shape[]>([])
   const [numberOfFlips, setNumberOfFlips] = useState(0)
   const [timeRemaining, setTimeRemaining] = useState<null | number>(null)
   const [score, setScore] = useState(0)
+  const [showModal, setShowModal] = useState(false)
 
   useEffect(() => {
+    if (timeRemaining === 0) {
+      setShowModal(true)
+      return
+    }
     setTimeout(() => setTimeRemaining((prev) => (prev ? prev - 1 : prev)), 1000)
   }, [timeRemaining])
 
@@ -25,9 +28,18 @@ function App() {
     if (timeRemaining === null) {
       setTimeRemaining(60)
     }
-    setCards((prev) =>
-      prev.map((card) => (card.uniqueId === uniqueId ? { ...card, flipped: true } : card))
-    )
+    setCards((prev) => {
+      const nextState = prev.map((card) =>
+        card.uniqueId === uniqueId ? { ...card, flipped: true } : card
+      )
+
+      // check for a win
+      if (nextState.find((it) => !it.flipped) === undefined) {
+        setShowModal(true)
+      }
+
+      return nextState
+    })
   }
 
   function handleCardClick(uniqueId: string) {
@@ -57,8 +69,8 @@ function App() {
         setScore((prev) => prev - 5)
         setTimeout(() => {
           setCurrentFlippedCards([])
-          setCards((prevCards) => {
-            return prevCards.map((card) => {
+          setCards((prevCards) =>
+            prevCards.map((card) => {
               if (
                 card.uniqueId === currentFlippedCards[0].uniqueId ||
                 card.uniqueId === uniqueId
@@ -68,7 +80,7 @@ function App() {
                 return card
               }
             })
-          })
+          )
         }, 1000)
         flipCard(uniqueId)
       }
@@ -81,7 +93,7 @@ function App() {
       <GameInfo
         moves={numberOfFlips}
         score={score}
-        timer={timeRemaining?.toString() ?? '-'}
+        timer={timeRemaining?.toString() ?? '60'}
       />
       <div className="cards-container">
         {cards.map(({ shapeId, uniqueId, shape, flipped }) => (
@@ -96,7 +108,18 @@ function App() {
         ))}
       </div>
       {showModal && (
-        <GameModal moves={10} score={40} win={true} handleResetGame={() => {}} />
+        <GameModal
+          moves={numberOfFlips}
+          score={score}
+          win={cards.find((it) => it.flipped === false) === undefined ? true : false}
+          handleResetGame={() => {
+            setCards(generateCards(shapes))
+            setShowModal(false)
+            setScore(0)
+            setNumberOfFlips(0)
+            setTimeRemaining(null)
+          }}
+        />
       )}
     </div>
   )
