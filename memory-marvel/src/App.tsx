@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './App.css'
 import Card from './components/Card/Card'
 import GameInfo from './components/GameInfo/GameInfo'
@@ -12,8 +12,19 @@ function App() {
 
   const [cards, setCards] = useState(generateCards(shapes))
   const [currentFlippedCards, setCurrentFlippedCards] = useState<Shape[]>([])
+  const [numberOfFlips, setNumberOfFlips] = useState(0)
+  const [timeRemaining, setTimeRemaining] = useState<null | number>(null)
+  const [score, setScore] = useState(0)
+
+  useEffect(() => {
+    setTimeout(() => setTimeRemaining((prev) => (prev ? prev - 1 : prev)), 1000)
+  }, [timeRemaining])
 
   function flipCard(uniqueId: string) {
+    setNumberOfFlips((prev) => prev + 1)
+    if (timeRemaining === null) {
+      setTimeRemaining(60)
+    }
     setCards((prev) =>
       prev.map((card) => (card.uniqueId === uniqueId ? { ...card, flipped: true } : card))
     )
@@ -38,10 +49,12 @@ function App() {
       // check if the cards match
       if (clickedCard.shapeId === currentFlippedCards[0].shapeId) {
         // cards match.
+        setScore((prev) => prev + 10)
         setCurrentFlippedCards([])
         flipCard(uniqueId)
       } else {
         // cards don't match. reveal the card, but then unflip them both in a moment
+        setScore((prev) => prev - 5)
         setTimeout(() => {
           setCurrentFlippedCards([])
           setCards((prevCards) => {
@@ -65,7 +78,11 @@ function App() {
   return (
     <div>
       <Header />
-      <GameInfo moves={0} score={0} timer={'60'} />
+      <GameInfo
+        moves={numberOfFlips}
+        score={score}
+        timer={timeRemaining?.toString() ?? '-'}
+      />
       <div className="cards-container">
         {cards.map(({ shapeId, uniqueId, shape, flipped }) => (
           <Card
